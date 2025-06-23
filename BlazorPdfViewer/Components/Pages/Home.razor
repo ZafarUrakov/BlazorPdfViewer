@@ -1,8 +1,12 @@
 ﻿@page "/"
 @using Syncfusion.Blazor.SfPdfViewer
 
-<SfPdfViewer2 DocumentPath="C:\\Users\\133\\source\\repos\\BlazorPdfViewer\\BlazorPdfViewer\\wwwroot\\Pdfs\\A4\\Chapter_14.pdf"
-              Height="100%"
+<SfPdfViewer2 DocumentPath=@Path
+              Height="100vh"
               Width="100%">
 
 </SfPdfViewer2>
+
+@code{
+    public string Path { get; set; } = "C:\\Users\\133\\source\\repos\\BlazorPdfViewer\\BlazorPdfViewer\\wwwroot\\Pdfs\\A3\\Chapter_14.pdf";
+}
