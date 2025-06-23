@@ -1,10 +1,17 @@
 using BlazorPdfViewer.Components;
+using Syncfusion.Blazor;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddSignalR(o => { o.MaximumReceiveMessageSize = 102400000; });
+
+builder.Services.AddMemoryCache();
+builder.Services.AddSyncfusionBlazor();
+Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("paste");
 
 var app = builder.Build();
 
