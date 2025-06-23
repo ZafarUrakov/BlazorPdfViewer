@@ -1,12 +1,63 @@
 ﻿@page "/"
+@rendermode InteractiveAuto
 @using Syncfusion.Blazor.SfPdfViewer
 
-<SfPdfViewer2 DocumentPath=@Path
+<SfPdfViewer2 @ref="pdfViewer"
+              DocumentPath="@Path"
               Height="100vh"
-              Width="100%">
+              Width="100%"
+              EnableZoomOptimization="true"
+              
+              EnablePinchZoom="true">
 
+    <PdfViewerEvents ZoomChanged="OnZoomChanged"
+                     DocumentLoaded="OnDocumentLoaded" />
 </SfPdfViewer2>
 
-@code{
-    public string Path { get; set; } = "C:\\Users\\133\\source\\repos\\BlazorPdfViewer\\BlazorPdfViewer\\wwwroot\\Pdfs\\A3\\Chapter_14.pdf";
+@code
+{
+    private SfPdfViewer2? pdfViewer;     // viewer handle
+    private string Path { get; set; } = @"C:\Users\133\source\repos\BlazorPdfViewer\BlazorPdfViewer\wwwroot\ZoomLevels\Chapter_14_Zoom_100p.pdf";
+
+    private int pendingZoom = 100;       // zoom we want after swap
+    private bool changingDoc = false;    // prevents recursion
+
+    // fires every time user zooms
+    private async Task OnZoomChanged(ZoomChangeEventArgs e)
+    {
+        if (changingDoc) return;         // ignore the event we ourselves trigger
+
+        pendingZoom = e.CurrentZoomValue;     // remember the new zoom
+        var newPath = MapZoomToFile(pendingZoom);
+
+        if (newPath != Path)
+        {
+            changingDoc = true;          // tell the next DocumentLoaded we're in a swap
+            Path = newPath;              // swap the file
+        }
+    }
+
+    // fires when the new PDF is ready
+    private async Task OnDocumentLoaded(LoadEventArgs _)
+    {
+        if (changingDoc && pdfViewer is not null)
+        {
+            await pdfViewer.ZoomAsync(pendingZoom); // restore wanted zoom
+            changingDoc = false;                    // done
+        }
+    }
+
+    // helper that maps zoom % → file name
+    private static string MapZoomToFile(int z) => z switch
+    {
+        >= 10 and < 25 => @"C:\Users\133\source\repos\BlazorPdfViewer\BlazorPdfViewer\wwwroot\ZoomLevels\Chapter_14_Zoom_10p.pdf",
+        >= 25 and < 50 => @"C:\Users\133\source\repos\BlazorPdfViewer\BlazorPdfViewer\wwwroot\ZoomLevels\Chapter_14_Zoom_25p.pdf",
+        >= 50 and < 75 => @"C:\Users\133\source\repos\BlazorPdfViewer\BlazorPdfViewer\wwwroot\ZoomLevels\Chapter_14_Zoom_50p.pdf",
+        >= 75 and < 100 => @"C:\Users\133\source\repos\BlazorPdfViewer\BlazorPdfViewer\wwwroot\ZoomLevels\Chapter_14_Zoom_75p.pdf",
+        >= 100 and < 125 => @"C:\Users\133\source\repos\BlazorPdfViewer\BlazorPdfViewer\wwwroot\ZoomLevels\Chapter_14_Zoom_100p.pdf",
+        >= 125 and < 150 => @"C:\Users\133\source\repos\BlazorPdfViewer\BlazorPdfViewer\wwwroot\ZoomLevels\Chapter_14_Zoom_125p.pdf",
+        >= 150 and < 200 => @"C:\Users\133\source\repos\BlazorPdfViewer\BlazorPdfViewer\wwwroot\ZoomLevels\Chapter_14_Zoom_150p.pdf",
+        >= 200 and <= 400 => @"C:\Users\133\source\repos\BlazorPdfViewer\BlazorPdfViewer\wwwroot\ZoomLevels\Chapter_14_Zoom_200p.pdf",
+        _ => @"C:\Users\133\source\repos\BlazorPdfViewer\BlazorPdfViewer\wwwroot\ZoomLevels\Chapter_14_Zoom_100p.pdf"
+    };
 }
