@@ -1,5 +1,7 @@
 ﻿@page "/"
 @rendermode InteractiveAuto
+@inject IInteroplyService Interoply
+@using Interoply
 @using Syncfusion.Blazor.SfPdfViewer
 
 <style>
@@ -44,16 +46,47 @@ EnablePinchZoom="true">
     private string Path { get; set; } = @"C:\Users\133\source\repos\BlazorPdfViewer\BlazorPdfViewer\wwwroot\ZoomLevels\Chapter_14_Zoom_100p.pdf";
     private int pendingZoom = 100;
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await Interoply.RegisterOnResizeListnerAsync(OnResize);
+        }
+    }
+
     private async Task OnZoomChanged(ZoomChangeEventArgs e)
     {
         pendingZoom = e.CurrentZoomValue;
+
+        if (pendingZoom == 98)
+            return;
+
         var newPath = MapZoomToFile(pendingZoom);
         if (newPath != Path)
         {
             Path = newPath;
             await pdfViewer.LoadAsync(newPath);
             await pdfViewer.ZoomAsync(pendingZoom);
-            StateHasChanged();
+        }
+    }
+
+    private async ValueTask OnResize(int width)
+    {
+        int newZoom = width switch
+        {
+            <= 1200 => 400,  // 0–900 px → max zoom
+            <= 1300 => 200,  // 901–1200 px
+            <= 1400 => 150,  // 1201–1400 px
+            <= 1600 => 125,  // 1401–1600 px
+            <= 1800 => 100,  // 1601–1800 px
+            _ => 100    // Very large screens show more of the page
+        };
+
+        var newPath = MapZoomToFile(newZoom);
+        if (newPath != Path)
+        {
+            Path = newPath;
+            await pdfViewer.LoadAsync(newPath);
         }
     }
     
@@ -66,7 +99,8 @@ EnablePinchZoom="true">
         >= 100 and < 125 => @"C:\Users\133\source\repos\BlazorPdfViewer\BlazorPdfViewer\wwwroot\ZoomLevels\Chapter_14_Zoom_100p.pdf",
         >= 125 and < 150 => @"C:\Users\133\source\repos\BlazorPdfViewer\BlazorPdfViewer\wwwroot\ZoomLevels\Chapter_14_Zoom_125p.pdf",
         >= 150 and < 200 => @"C:\Users\133\source\repos\BlazorPdfViewer\BlazorPdfViewer\wwwroot\ZoomLevels\Chapter_14_Zoom_150p.pdf",
-        >= 200 and <= 400 => @"C:\Users\133\source\repos\BlazorPdfViewer\BlazorPdfViewer\wwwroot\ZoomLevels\Chapter_14_Zoom_200p.pdf",
+        >= 200 and < 400 => @"C:\Users\133\source\repos\BlazorPdfViewer\BlazorPdfViewer\wwwroot\ZoomLevels\Chapter_14_Zoom_200p.pdf",
+        >= 400 and <= 1000 => @"C:\Users\133\source\repos\BlazorPdfViewer\BlazorPdfViewer\wwwroot\ZoomLevels\Chapter_14_Zoom_400p.pdf",
         _ => @"C:\Users\133\source\repos\BlazorPdfViewer\BlazorPdfViewer\wwwroot\ZoomLevels\Chapter_14_Zoom_100p.pdf"
     };
 }

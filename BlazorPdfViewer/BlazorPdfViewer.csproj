@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -7,6 +7,7 @@
   </PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Interoply" Version="0.1.0" />
 		<PackageReference Include="Syncfusion.Blazor.Themes" Version="29.2.11" />
 		<PackageReference Include="Syncfusion.Blazor.SfPdfViewer" Version="29.2.11" />
 		<PackageReference Include="Syncfusion.Blazor.Layouts" Version="29.2.11" />
