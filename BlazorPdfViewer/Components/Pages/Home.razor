@@ -2,52 +2,61 @@
 @rendermode InteractiveAuto
 @using Syncfusion.Blazor.SfPdfViewer
 
-<SfPdfViewer2 @ref="pdfViewer"
-              DocumentPath="@Path"
-              Height="100vh"
-              Width="100%"
-              EnableZoomOptimization="true"
-              
-              EnablePinchZoom="true">
+<style>
+    /* Hide the default loading indicator and border */
+    .e-pv-loading-indicator,
+    .e-pv-loading,
+    .e-spinner-pane {
+    display: none !important;
+    }
 
-    <PdfViewerEvents ZoomChanged="OnZoomChanged"
-                     DocumentLoaded="OnDocumentLoaded" />
+    /* Remove borders from PDF viewer container */
+    .e-pv-viewer-container,
+    .e-pdfviewer,
+    .e-pv-viewer {
+    border: none !important;
+    }
+
+    /* Remove any outline or border during loading */
+    .e-pv-viewer-container::before,
+    .e-pv-viewer-container::after {
+    display: none !important;
+    }
+
+    .e-pv-viewer-container {
+    background: white !important;
+    }
+</style>
+<SfPdfViewer2 @ref="pdfViewer"
+DocumentPath="@Path"
+Height="100vh"
+Width="100%"
+EnableTextMarkupAnnotation="true"
+EnableZoomOptimization="true"
+EnablePinchZoom="true">
+    <PdfViewerEvents ZoomChanged=@OnZoomChanged/>
+
 </SfPdfViewer2>
 
 @code
 {
-    private SfPdfViewer2? pdfViewer;     // viewer handle
+    private SfPdfViewer2 pdfViewer;
     private string Path { get; set; } = @"C:\Users\133\source\repos\BlazorPdfViewer\BlazorPdfViewer\wwwroot\ZoomLevels\Chapter_14_Zoom_100p.pdf";
+    private int pendingZoom = 100;
 
-    private int pendingZoom = 100;       // zoom we want after swap
-    private bool changingDoc = false;    // prevents recursion
-
-    // fires every time user zooms
     private async Task OnZoomChanged(ZoomChangeEventArgs e)
     {
-        if (changingDoc) return;         // ignore the event we ourselves trigger
-
-        pendingZoom = e.CurrentZoomValue;     // remember the new zoom
+        pendingZoom = e.CurrentZoomValue;
         var newPath = MapZoomToFile(pendingZoom);
-
         if (newPath != Path)
         {
-            changingDoc = true;          // tell the next DocumentLoaded we're in a swap
-            Path = newPath;              // swap the file
+            Path = newPath;
+            await pdfViewer.LoadAsync(newPath);
+            await pdfViewer.ZoomAsync(pendingZoom);
+            StateHasChanged();
         }
     }
-
-    // fires when the new PDF is ready
-    private async Task OnDocumentLoaded(LoadEventArgs _)
-    {
-        if (changingDoc && pdfViewer is not null)
-        {
-            await pdfViewer.ZoomAsync(pendingZoom); // restore wanted zoom
-            changingDoc = false;                    // done
-        }
-    }
-
-    // helper that maps zoom % → file name
+    
     private static string MapZoomToFile(int z) => z switch
     {
         >= 10 and < 25 => @"C:\Users\133\source\repos\BlazorPdfViewer\BlazorPdfViewer\wwwroot\ZoomLevels\Chapter_14_Zoom_10p.pdf",

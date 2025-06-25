@@ -1,19 +1,74 @@
 ﻿@page "/counter"
-@rendermode InteractiveServer
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.SfPdfViewer
 
-<PageTitle>Counter</PageTitle>
+<div style="display:inline-block">
+    <SfButton OnClick="OnZoomInClick">Zoom In</SfButton>
+</div>
 
-<h1>Counter</h1>
+<div style="display:inline-block">
+    <SfButton OnClick="OnZoomOutClick">Zoom Out</SfButton>
+</div>
 
-<p role="status">Current count: @currentCount</p>
+<div style="display:inline-block">
+    <SfTextBox @ref="@TextBox"></SfTextBox>
+</div>
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+<div style="display:inline-block">
+    <SfButton OnClick="OnZoomClick">Zoom</SfButton>
+</div>
+
+<div style="display:inline-block;">
+    <SfButton OnClick="OnFitPageClick">Fit To Page</SfButton>
+</div>
+
+<div style="display:inline-block">
+    <SfButton OnClick="OnFitWidthClick">Fit To Width</SfButton>
+</div>
+
+<div style="display:inline-block">
+    <SfButton OnClick="OnFitHeightClick">Fit To Height</SfButton>
+</div>
+
+<SfPdfViewer2 Height="100vh"
+              Width="100%"
+              DocumentPath="@DocumentPath"
+              @ref="@Viewer" />
 
 @code {
-    private int currentCount = 0;
+    SfPdfViewer2 Viewer;
+    SfTextBox TextBox;
+    public string DocumentPath { get; set; } = @"C:\Users\133\source\repos\BlazorPdfViewer\BlazorPdfViewer\wwwroot\ZoomLevels\Chapter_14_Zoom_100p.pdf";
 
-    private void IncrementCount()
+    public async void OnZoomInClick(MouseEventArgs args)
     {
-        currentCount++;
+        await Viewer.ZoomInAsync();
+    }
+
+    public async void OnZoomOutClick(MouseEventArgs args)
+    {
+        await Viewer.ZoomOutAsync();
+    }
+
+    public async void OnFitPageClick(MouseEventArgs args)
+    {
+        await Viewer.FitToPageAsync();
+    }
+
+    public async void OnZoomClick(MouseEventArgs args)
+    {
+        int zoomValue = int.Parse(TextBox.Value.ToString());
+        await Viewer.ZoomAsync(zoomValue);
+    }
+
+    public async void OnFitWidthClick(MouseEventArgs args)
+    {
+        await Viewer.FitToWidthAsync();
+    }
+
+    public async void OnFitHeightClick(MouseEventArgs args)
+    {
+        await Viewer.FitToHeightAsync();
     }
 }
