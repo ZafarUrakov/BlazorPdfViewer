@@ -45,6 +45,7 @@ EnablePinchZoom="true">
     private SfPdfViewer2 pdfViewer;
     private string Path { get; set; } = @"C:\Users\133\source\repos\BlazorPdfViewer\BlazorPdfViewer\wwwroot\ZoomLevels\Chapter_14_Zoom_100p.pdf";
     private int pendingZoom = 100;
+    public bool IsNativeZoom { get; set; } = false;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -58,8 +59,8 @@ EnablePinchZoom="true">
     {
         pendingZoom = e.CurrentZoomValue;
 
-        if (pendingZoom == 98)
-            return;
+        // if (IsNativeZoom == true)
+        //     return;
 
         var newPath = MapZoomToFile(pendingZoom);
         if (newPath != Path)
@@ -67,6 +68,7 @@ EnablePinchZoom="true">
             Path = newPath;
             await pdfViewer.LoadAsync(newPath);
             await pdfViewer.ZoomAsync(pendingZoom);
+            IsNativeZoom = false;
         }
     }
 
@@ -87,6 +89,7 @@ EnablePinchZoom="true">
         {
             Path = newPath;
             await pdfViewer.LoadAsync(newPath);
+            IsNativeZoom = true;
         }
     }
     
