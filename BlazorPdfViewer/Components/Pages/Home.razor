@@ -1,6 +1,7 @@
 ﻿@page "/"
 @rendermode InteractiveAuto
 @inject IInteroplyService Interoply
+@inject IJSRuntime JS
 @using Interoply
 @using Syncfusion.Blazor.SfPdfViewer
 
@@ -8,42 +9,46 @@
     .e-pv-loading-indicator,
     .e-pv-loading,
     .e-spinner-pane {
-        display: none !important;
+    display: none !important;
     }
 
     .e-pv-viewer-container,
     .e-pdfviewer,
     .e-pv-viewer {
-        border: none !important;
+    border: none !important;
     }
 
-        .e-pv-viewer-container::before,
-        .e-pv-viewer-container::after {
-            display: none !important;
-        }
+    .e-pv-viewer-container::before,
+    .e-pv-viewer-container::after {
+    display: none !important;
+    }
 
     .e-pv-viewer-container {
-        background: white !important;
+    background: white !important;
     }
 </style>
 
 <SfPdfViewer2 @ref="pdfViewer"
-              DocumentPath="@Path"
-              Height="100vh"
-              Width="100%"
-              EnableTextMarkupAnnotation="true"
-              EnableZoomOptimization="true"
-              EnablePinchZoom="true">
+DocumentPath="@Path"
+Height="100vh"
+Width="100%"
+EnableTextMarkupAnnotation="true"
+EnableZoomOptimization="true"
+EnablePinchZoom="true">
+<PdfViewerHighlightSettings >
 
-    <PdfViewerEvents />
+</PdfViewerHighlightSettings>
+    <PdfViewerEvents DocumentLoaded="OnDocumentLoaded" AnnotationAdded=@OnHightlith />
 </SfPdfViewer2>
 
-@code
-{
+@code {
     private SfPdfViewer2 pdfViewer;
-    private string Path { get; set; } = @"C:\Users\133\source\repos\BlazorPdfViewer\BlazorPdfViewer\wwwroot\ZoomLevels\Chapter_14_Zoom_100p.pdf";
-    private int pendingZoom = 100;
-    public bool IsNativeZoom { get; set; } = false;
+    private string Path { get; set; } =
+        @"C:\Users\133\source\repos\BlazorPdfViewer\BlazorPdfViewer\wwwroot\ZoomLevels\Chapter_14_Zoom_100p.pdf";
+
+    // Fix: Use double instead of int for scroll position
+    private double? scrollTop = null;
+    private bool shouldRestoreScroll = false;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -53,15 +58,23 @@
         }
     }
 
+    private async Task OnHightlith(AnnotationAddEventArgs annotationAddEventArgs)
+    {
+        Console.WriteLine(annotationAddEventArgs.AnnotationProperties.DefaultText);
+    }
+
     private async ValueTask OnResize(int width)
     {
+        scrollTop = await JS.InvokeAsync<double>("pdfScrollHelper.getScrollTop");
+        shouldRestoreScroll = true;
+
         int newZoom = width switch
         {
-            <= 1200 => 400,  // 0–900 px → max zoom
-            <= 1300 => 200,  // 901–1200 px
-            <= 1400 => 150,  // 1201–1400 px
-            <= 1600 => 125,  // 1401–1600 px
-            <= 1800 => 100,  // 1601–1800 px
+            <= 1200 => 400,
+            <= 1300 => 200,
+            <= 1400 => 150,
+            <= 1600 => 125,
+            <= 1800 => 100,
             _ => 100
         };
 
@@ -69,8 +82,17 @@
         if (newPath != Path)
         {
             Path = newPath;
+            StateHasChanged(); // Ensure UI updates
             await pdfViewer.LoadAsync(newPath);
-            IsNativeZoom = true;
+        }
+    }
+
+    private async Task OnDocumentLoaded()
+    {
+        if (scrollTop.HasValue && shouldRestoreScroll)
+        {
+            await JS.InvokeVoidAsync("pdfScrollHelper.setScrollTop", scrollTop.Value);
+            shouldRestoreScroll = false;
         }
     }
 
