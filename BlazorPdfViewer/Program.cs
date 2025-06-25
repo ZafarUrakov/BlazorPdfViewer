@@ -12,6 +12,7 @@ builder.Services.AddSignalR(o => { o.MaximumReceiveMessageSize = 102400000; });
 builder.Services.AddMemoryCache();
 builder.Services.AddSyncfusionBlazor();
 Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("paste");
+builder.Services.AddInteroply();
 
 var app = builder.Build();
 

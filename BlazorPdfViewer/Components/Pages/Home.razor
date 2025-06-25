@@ -5,39 +5,37 @@
 @using Syncfusion.Blazor.SfPdfViewer
 
 <style>
-    /* Hide the default loading indicator and border */
     .e-pv-loading-indicator,
     .e-pv-loading,
     .e-spinner-pane {
-    display: none !important;
+        display: none !important;
     }
 
-    /* Remove borders from PDF viewer container */
     .e-pv-viewer-container,
     .e-pdfviewer,
     .e-pv-viewer {
-    border: none !important;
+        border: none !important;
     }
 
-    /* Remove any outline or border during loading */
-    .e-pv-viewer-container::before,
-    .e-pv-viewer-container::after {
-    display: none !important;
-    }
+        .e-pv-viewer-container::before,
+        .e-pv-viewer-container::after {
+            display: none !important;
+        }
 
     .e-pv-viewer-container {
-    background: white !important;
+        background: white !important;
     }
 </style>
-<SfPdfViewer2 @ref="pdfViewer"
-DocumentPath="@Path"
-Height="100vh"
-Width="100%"
-EnableTextMarkupAnnotation="true"
-EnableZoomOptimization="true"
-EnablePinchZoom="true">
-    <PdfViewerEvents ZoomChanged=@OnZoomChanged/>
 
+<SfPdfViewer2 @ref="pdfViewer"
+              DocumentPath="@Path"
+              Height="100vh"
+              Width="100%"
+              EnableTextMarkupAnnotation="true"
+              EnableZoomOptimization="true"
+              EnablePinchZoom="true">
+
+    <PdfViewerEvents />
 </SfPdfViewer2>
 
 @code
@@ -55,23 +53,6 @@ EnablePinchZoom="true">
         }
     }
 
-    private async Task OnZoomChanged(ZoomChangeEventArgs e)
-    {
-        pendingZoom = e.CurrentZoomValue;
-
-        // if (IsNativeZoom == true)
-        //     return;
-
-        var newPath = MapZoomToFile(pendingZoom);
-        if (newPath != Path)
-        {
-            Path = newPath;
-            await pdfViewer.LoadAsync(newPath);
-            await pdfViewer.ZoomAsync(pendingZoom);
-            IsNativeZoom = false;
-        }
-    }
-
     private async ValueTask OnResize(int width)
     {
         int newZoom = width switch
@@ -81,7 +62,7 @@ EnablePinchZoom="true">
             <= 1400 => 150,  // 1201–1400 px
             <= 1600 => 125,  // 1401–1600 px
             <= 1800 => 100,  // 1601–1800 px
-            _ => 100    // Very large screens show more of the page
+            _ => 100
         };
 
         var newPath = MapZoomToFile(newZoom);
@@ -92,7 +73,7 @@ EnablePinchZoom="true">
             IsNativeZoom = true;
         }
     }
-    
+
     private static string MapZoomToFile(int z) => z switch
     {
         >= 10 and < 25 => @"C:\Users\133\source\repos\BlazorPdfViewer\BlazorPdfViewer\wwwroot\ZoomLevels\Chapter_14_Zoom_10p.pdf",
