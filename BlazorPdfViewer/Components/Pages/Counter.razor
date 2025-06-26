@@ -1,74 +1,28 @@
-﻿@page "/counter"
-@using Syncfusion.Blazor.Buttons
-@using Syncfusion.Blazor.Inputs
-@using Syncfusion.Blazor.SfPdfViewer
+﻿@page "/l"
+@using System.IO
+@using Syncfusion.Blazor.DocumentEditor
+@using System.Text.Json
 
-<div style="display:inline-block">
-    <SfButton OnClick="OnZoomInClick">Zoom In</SfButton>
-</div>
+<SfDocumentEditorContainer @ref="container" EnableToolbar="true" Height="100vh" Width="95%" >
+    <DocumentEditorContainerEvents Created="OnCreated"></DocumentEditorContainerEvents>
+</SfDocumentEditorContainer>
 
-<div style="display:inline-block">
-    <SfButton OnClick="OnZoomOutClick">Zoom Out</SfButton>
-</div>
-
-<div style="display:inline-block">
-    <SfTextBox @ref="@TextBox"></SfTextBox>
-</div>
-
-<div style="display:inline-block">
-    <SfButton OnClick="OnZoomClick">Zoom</SfButton>
-</div>
-
-<div style="display:inline-block;">
-    <SfButton OnClick="OnFitPageClick">Fit To Page</SfButton>
-</div>
-
-<div style="display:inline-block">
-    <SfButton OnClick="OnFitWidthClick">Fit To Width</SfButton>
-</div>
-
-<div style="display:inline-block">
-    <SfButton OnClick="OnFitHeightClick">Fit To Height</SfButton>
-</div>
-
-<SfPdfViewer2 Height="100vh"
-              Width="100%"
-              DocumentPath="@DocumentPath"
-              @ref="@Viewer" />
 
 @code {
-    SfPdfViewer2 Viewer;
-    SfTextBox TextBox;
-    public string DocumentPath { get; set; } = @"C:\Users\133\source\repos\BlazorPdfViewer\BlazorPdfViewer\wwwroot\ZoomLevels\Chapter_14_Zoom_100p.pdf";
+    SfDocumentEditorContainer container;
 
-    public async void OnZoomInClick(MouseEventArgs args)
+    public async void OnCreated(object args)
     {
-        await Viewer.ZoomInAsync();
-    }
+        string filePath = @"C:\Users\133\source\repos\BlazorPdfViewer\BlazorPdfViewer\wwwroot\ZoomLevels\Entitlements v3.docx";
+        using FileStream fileStream = new(filePath, FileMode.Open, FileAccess.Read);
+        WordDocument document = WordDocument.Load(fileStream, ImportFormatType.Docx);
+        string json = JsonSerializer.Serialize(document);
+        document.Dispose();
+        document = null;
 
-    public async void OnZoomOutClick(MouseEventArgs args)
-    {
-        await Viewer.ZoomOutAsync();
-    }
+        await container.DocumentEditor.OpenAsync(json);
+        container.RestrictEditing = true;
 
-    public async void OnFitPageClick(MouseEventArgs args)
-    {
-        await Viewer.FitToPageAsync();
-    }
-
-    public async void OnZoomClick(MouseEventArgs args)
-    {
-        int zoomValue = int.Parse(TextBox.Value.ToString());
-        await Viewer.ZoomAsync(zoomValue);
-    }
-
-    public async void OnFitWidthClick(MouseEventArgs args)
-    {
-        await Viewer.FitToWidthAsync();
-    }
-
-    public async void OnFitHeightClick(MouseEventArgs args)
-    {
-        await Viewer.FitToHeightAsync();
+        json = null;
     }
 }

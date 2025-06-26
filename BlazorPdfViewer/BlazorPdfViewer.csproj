@@ -7,10 +7,12 @@
   </PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="EpubSharp.dll" Version="1.1.5" />
 		<PackageReference Include="Interoply" Version="0.1.0" />
 		<PackageReference Include="Syncfusion.Blazor.Themes" Version="29.2.11" />
 		<PackageReference Include="Syncfusion.Blazor.SfPdfViewer" Version="29.2.11" />
 		<PackageReference Include="Syncfusion.Blazor.Layouts" Version="29.2.11" />
+		<PackageReference Include="Syncfusion.Blazor.WordProcessor" Version="29.1.33" />
 	</ItemGroup>
 
 </Project>
