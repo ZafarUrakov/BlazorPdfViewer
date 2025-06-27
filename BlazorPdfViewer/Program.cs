@@ -1,4 +1,5 @@
 using BlazorPdfViewer.Components;
+using Interoply.Extensions;
 using Syncfusion.Blazor;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +14,7 @@ builder.Services.AddMemoryCache();
 builder.Services.AddSyncfusionBlazor();
 Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("paste");
 builder.Services.AddInteroply();
+builder.Services.AddTelerikBlazor();
 
 var app = builder.Build();
 
